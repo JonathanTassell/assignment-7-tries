@@ -1,63 +1,62 @@
-#ifndef AUTOCOMPLETE_H
-#define AUTOCOMPLETE_H 
+#include "Autocomplete.h"
+#include <iostream> 
 
-#include <vector> 
-#include <string> 
+Autocomplete::Autocomplete(){
+    root = createNode(); 
+}
 
-const int alphabetSize = 26; 
+void Autocomplete::insert(std::string word){
+    Node* currNode = root; 
 
-class Autocomplete{ 
-    private:
-        struct Node{
-            //address of nodes children
-            std::vector<Node*> children; 
-            //if end of word then true 
-            bool isEndOfWord; 
-        }; 
+    for(size_t i=0; i<word.length(); i++){
+        int index = word[i] - 'a'; 
+        if(!currNode->children[index])
+            currNode->children[index] = createNode(); 
 
-        //root of Autocomplete
-        
-       
-    
-    public: 
-        Node* root; 
-        //constructor setting root's children to nullptr
-        Autocomplete();      
-    
+        currNode = currNode->children[index]; 
+    }
+    currNode->isEndOfWord = true; 
+}
 
+std::vector<std::string> Autocomplete::suggestionRecursive(Node* currNode, const std::string prefix){
+    std::vector<std::string> suggestions;
 
-        //insert function 
-        void insert(std::string word); 
-
-        //helper function for get suggestions
-        std::vector<std::string> suggestionRecursive(Node* currNode, const std::string currPrefix);
-
-        //get Suggestions main function 
-        std::vector<std::string> getSuggestions(std::string partialWord); 
+    if(currNode->isEndOfWord){
+        suggestions.push_back(prefix);
+    }
 
 
-
-
-
-        /***** STRUCTS AND TESTING *****/
-
-
-        //creates new node intialised with nullptrs
-        struct Node* createNode(){
-            struct Node* newNode = new Node; 
-
-            for(int i=0; i<alphabetSize; i++){
-                newNode->children.push_back(nullptr); 
-            }
-            newNode->isEndOfWord = false; 
+    for(int i = 0; i < 26; i++){
+        if(currNode->children.at(i)){
             
-            return newNode; 
-        }
-        
-        //for testing
-        Node* returnRoot(){
-            return root; 
-        }
-}; 
+            char nextChar = static_cast<char>('a' + i);
+            std::string nextPrefix = prefix + nextChar;
 
-#endif
+            //Using 
+            std::vector<std::string> childSuggestions = suggestionRecursive(currNode->children.at(i), nextPrefix);
+            suggestions.insert(suggestions.end(), childSuggestions.begin(), childSuggestions.end());
+        }
+    }
+
+    return suggestions;
+}
+
+
+std::vector<std::string> Autocomplete::getSuggestions(std::string partialWord){
+    std::vector<std::string> suggestions;
+    Node* currNode = root;
+
+    for(size_t i = 0; i < partialWord.length(); i++){
+        int index = partialWord.at(i) - 'a';
+        if (!currNode->children.at(index)){
+            return suggestions;
+        }
+        currNode = currNode->children.at(index);
+    }
+
+    suggestions = suggestionRecursive(currNode, partialWord);
+
+    return suggestions;
+}
+
+
