@@ -1,43 +1,63 @@
-#include "Autocomplete.h"
+#ifndef AUTOCOMPLETE_H
+#define AUTOCOMPLETE_H 
 
-Autocomplete::Autocomplete(){
-    root = createNode();  
-}
+#include <vector> 
+#include <string> 
 
-void Autocomplete::insert(std::string word){
-        Node* currNode = root; 
+const int alphabetSize = 26; 
+
+class Autocomplete{ 
+    private:
+        struct Node{
+            //address of nodes children
+            std::vector<Node*> children; 
+            //if end of word then true 
+            bool isEndOfWord; 
+        }; 
+
+        //root of Autocomplete
         
+       
     
-    for (size_t i = 0; i < word.length(); i++) {
-        int index = word.at(i) - 'a'; 
+    public: 
+        Node* root; 
+        //constructor setting root's children to nullptr
+        Autocomplete();      
+    
+
+
+        //insert function 
+        void insert(std::string word); 
+
+        //helper function for get suggestions
+        std::vector<std::string> suggestionRecursive(Node* currNode, const std::string currPrefix);
+
+        //get Suggestions main function 
+        std::vector<std::string> getSuggestions(std::string partialWord); 
+
+
+
+
+
+        /***** STRUCTS AND TESTING *****/
+
+
+        //creates new node intialised with nullptrs
+        struct Node* createNode(){
+            struct Node* newNode = new Node; 
+
+            for(int i=0; i<alphabetSize; i++){
+                newNode->children.push_back(nullptr); 
+            }
+            newNode->isEndOfWord = false; 
+            
+            return newNode; 
+        }
         
-        if (!currNode->children.at(index)) {
-            std::cout << "hi"; 
-            currNode->children.at(index) = new Node; 
-            currNode = currNode->children.at(index); 
+        //for testing
+        Node* returnRoot(){
+            return root; 
         }
-        else {
-            currNode = currNode->children.at(index); 
-        }
-    }
-    currNode->endOfWord = true;
-}
+}; 
 
-
-
-void Autocomplete::printNode(int num){
-    if(root->children.at(num) == nullptr)
-        return; 
-
-    Node* currNode = root->children.at(num); 
-    
-    for(int i=0; i<26; i++){
-        if(currNode->children.at(i)){
-            if(currNode->endOfWord)
-                return;
-            currNode = currNode->children.at(i); 
-            std::cout << std::to_string(i + 'a') << " "; 
-        }
-    }
-
-}
+#endif
