@@ -25,7 +25,7 @@ class Autocomplete{
 
         std::vector<std::string> suggestionRecursive(Node* currNode, const std::string currPrefix);
 
-        std::vector<std::string> getsSuggestions(std::string partialWord); 
+        std::vector<std::string> getSuggestions(std::string partialWord); 
 
         //initialises
         struct Node* createNode(){
